@@ -4,7 +4,7 @@
   //different between single quoted and multiple quoted returns the string as it is but multiple return the value of variable (echo "hello $x" ,echo 'hello $x') 
   define($dp,3560.14,true); //var,value,case sensitive -->> static var or value 
   echo var_dump($var); //check the data type of variable (string ,int ,float,...)
-  $a='b'; $b=5; echo $$a; //==>> echo $b >> output=10
+  $a='b'; $b=5; echo $$a; //==>> echo $b >> output=5
   echo substr($x,0,7); //print part of string (variable,first,end)
   echo strpos($x,'v'); //print position of character (variable,char)
   echo strpos($x,'l',6); //print position of l after 6 characters
@@ -25,15 +25,26 @@
   echo htmlspecialchars($var); //print tags but these tags are not valid ==>> $var ="<h1>Hello</h1>";
   echo '<br>'; //print new line
   echo $x.$y.$var; //(. ==>> dot)concatenation (print more than one variable or value)
+  echo "$x $y $var"; // concatenation ( but the different between this and dot,we can't concatenate defined variables or functions)
   echo 5**3; //power(5,3) ==>> 5*5*5 (Mathematical Operations)
   //assignment operators (= , -= , %= , *= , /=) ==>> ($x-=5; ==> $x=$x-5 | $x*=10 ==> $x=$x*10)
   //increment or decrement operators (-- , ++) ==>> ($x-- ==>> $x=$x-1 | $x++ ==>> $x=$x+1 ) have two type (postfix or prefix) ==>> (--$x | ++$x) prefix
-  # Comparison Operators (== , > , < ,!= , <>, >= , <= ,=== , !==) (<> refer to not equal) (=== compare equality and data type)
+  # Comparison Operators (== , > , < ,!= , <>, >= , <= ,=== , !== , <=>) (<> refer to not equal) (=== compare equality and data type) (<=> if value is not equal ot will return -1 , equal return 0 , more than return 1)
   echo $x>$y;  //print 1 if comparison is true else didn't print anything (boolean variable)
   #logical operator ( && , || , !, xor) ( !$x ==>> check if x is found or not ,if isn't found print 1 else didn't print anything) , (xor it will execute if 2 condition is reverse to each other (xor gate in(cs)))
       //examples: echo x >10 && y>20 , echo x>10 xor y>20 ,  echo x>10 || y>20 
   //comment in single line(//,#) more than one line(/**/)
-  
+
+  // error message
+    echo @$a; // will not print error if $a is not exist 
+    $b=@$a or die("the variable is not found"); // remove the error message and print this message in die function
+
+
+  //Magic Constants
+    echo __LINE__; //print the number of line (the output will be 37)
+    echo __FILE__; //print the name of file (the output will be c:\xampp\htdocs\proj\notes.php)
+    echo __DIR__; //print the directory
+
   // #condition
     //if condition
       if ($x<10 xor $x >10) echo "yes"; else echo "no";
@@ -60,9 +71,9 @@
   // #loop
     while($counter>0){echo $counter." "; $counter--; }  
     do{echo $counter."<br>";$counter--;}while($counter>0);
-    for($i=0;$i<=10;$i++){echo $i." ";}
+    //for($i=0;$i<=10;$i++){echo $i." ";}
     $x=0; for(;;){echo $x." ";$x++;} //(infinite loop)
-    foreach($x as $x) echo $x;
+    //foreach($x as $x) echo $x;
     //break ==>> break for loop
     //continue ==>> skip step
   
@@ -94,6 +105,25 @@
     }
     PrintNumb(); 
 
+    function calculate(...$nums){ // spreed syntax (when we can't know the number of indexes)
+      // use foreach to calculate numbers
+      echo func_num_args(); // number of arguments (output 3)
+      print_r(func_get_args()); // print array of index 
+      echo func_get_arg(2); // print the index 2   
+    }
+    calculate(30,40,50);
+
+  // pass by reference
+    function func1(&$num):int { // int refers to number is integer 
+      $num+=5;
+      return $num;
+    }
+    $num=15;
+    echo $num; // output 15
+    func1($num); // output 20
+    echo $num; // output 20
+
+  
   //# Static Variable
     static $x=1;
   // #array
@@ -102,6 +132,7 @@
       $numbers=array(1,2,3,4,5);
       print_r($numbers); //print for all element in th array
       $numbers[]=6; //push back in array
+      $array=[1 => "1", 2 => "2", 3 => "3", 4 => "4"] // any key have value
 
     // # associative array
       $grades=array('arabic'=>10,'math'=>20,'english'=>30); // array[arabic]= 10 ,array[english]=30 and so on ..
@@ -149,6 +180,7 @@
 
   //$ include
     echo include('x.php'); // recall page with name x.php  (after and before include will execute)
+    include_once('x.php'); // recall page with name x.php (if it includes before it will ignore the include again)
     echo require('x.php'); // after require and require will not execute if we found error
 
  function check($var){
@@ -188,6 +220,10 @@
 
   //sanitize ==>>Remove any illegal character from the data
     $email = filter_var($email, FILTER_SANITIZE_EMAIL); // Remove all illegal characters from email
+  
+  // Filter input
+      echo filter_input(INPUT_GET,"num",FILTER_VALIDATE_INT) // method , name (input form) , filter (remove unsupported characters)
+    
 
   //to upload image ==>>should method (form) have enctype=multipart/form-data
     if(isset($_FILES['image'])){
@@ -251,6 +287,57 @@
     $_SESSION['user']=$user;
     session_destroy(); //logout from session
 
+  ###########################################MYSQL################################################
+
+  // Database Connection
+  //mysqli_connect(); // take 4 parameters => host ,user password,dbname / return => connection status
+  $host="localhost";
+  $user="irix";
+  $pass="1234";
+  $dbname="users";
+  $connection_stat=mysqli_connect($host,$user,$pass,$dbname);
+  print $connection_stat ? "connected":mysqli_connect_error(); // to check success connection or not
+  
+  //insert data into database
+  $p=md5(123); // hash of password
+  $query="INSERT INTO `accounts` (`id`, `name`, `password`) VALUES (NULL,'ali','$p');"; // insert data into database
+  mysqli_query($connection_stat,$query); // to execute query ( connection , query)
+  mysqli_insert_id($connection_stat); // show the last id was inserted
+
+  // retrieve data from database
+  $query="SELECT * FROM `accounts`;";
+  $result=mysqli_query($connection_stat,$query); // return 2 dimensional array associated (result set)
+  echo mysqli_num_rows($result); // number of rows 
+  while ($rows=mysqli_fetch_array($result)) { // fetch data from database ( rows => array to store results)
+    echo $rows['id']." ". $rows['name']." " . $rows['password']."<br>"; // display data
+  }
+
+  // condition
+  $query="SELECT * FROM `accounts` WHERE `id` BETWEEN 1 AND 5;"; // ( WHERE ==> condition ) between => range query
+  $query="SELECT * FROM `accounts` WHERE `name` IN ('ahmed', 'ali',omer');"; // IN or NOT IN
+  $query="SELECT * FROM `accounts` WHERE `name` LIKE 'a%';"; // names start with a (%a => end with a) (%a% => contain to a) (_a => the second char is a)
+
+  // Some MYSQL Functions
+  $query="SELECT COUNT(`id`) AS c FROM `accounts`;"; // count number of IDs in DB
+  $query="SELECT MAX(`id`) AS c FROM `accounts`;"; // the Maximum value 
+  $query="SELECT MIN(`id`) AS c FROM `accounts`;"; // the minimum value
+  $query="SELECT SUM(`id`) AS c FROM `accounts`;"; // the summation for all values in db
+  $query="SELECT AVG(`id`) AS c FROM `accounts`;"; // the average for all values
+  $query="SELECT UCASE(`name`) AS c FROM `accounts`;"; // all names in db will be uppercase
+  $query="SELECT LCASE(`name`) AS c FROM `accounts`;"; // all names in db will be lowercase
+  $query="SELECT MID(`name`,1,4) AS c FROM `accounts`;"; // print part of chars on name
+
+  $result=mysqli_query($connection_stat,$query);
+  $data=mysqli_fetch_assoc($result); // fetch data like 'mysqli_fetch_array()'
+  echo "count =". $data['c']; 
+
+  // update data in DB
+  $query="UPDATE `accounts` SET `name` = 'omer' WHERE `name`='ali';";
+
+  // Delete
+  $query="DELETE FROM `accounts` WHERE `name`='omer';"; // Delete row
+
+  mysqli_close($connection_stat) // close the connection
 ?>
 <!DOCTYPE html>
 <html lang="en">
